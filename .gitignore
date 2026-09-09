@@ -1,0 +1,14 @@
+*.exe
+*.obj
+*.o
+*.ilk
+*.pdb
+*.idb
+.vscode/
+*.exe
+*.obj
+*.o
+*.ilk
+*.pdb
+*.idb
+.vscode/

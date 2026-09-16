@@ -25,7 +25,7 @@ int main() {
         a[i] = new double[cols];
     }
 
-    // Read data from the file
+    // Read data from the file iris34_train.txt
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             fin >> a[i][j];
@@ -147,27 +147,27 @@ int main() {
     double sko2_2 = sqrt(dispersion2_2);
 
     // Output parameters
-    cout << "Class 0:" << endl;
-    cout << "Feature 1: math = " << math0_1
-         << ", sko = " << sko0_1 << endl;
-    cout << "Feature 2: math = " << math0_2
-         << ", sko = " << sko0_2 << endl;
+    // cout << "Class 0:" << endl;
+    // cout << "Feature 1: math = " << math0_1
+    //      << ", sko = " << sko0_1 << endl;
+    // cout << "Feature 2: math = " << math0_2
+    //      << ", sko = " << sko0_2 << endl;
 
-    cout << endl;
+    // cout << endl;
 
-    cout << "Class 1:" << endl;
-    cout << "Feature 1: math = " << math1_1
-         << ", sko = " << sko1_1 << endl;
-    cout << "Feature 2: math = " << math1_2
-         << ", sko = " << sko1_2 << endl;
+    // cout << "Class 1:" << endl;
+    // cout << "Feature 1: math = " << math1_1
+    //      << ", sko = " << sko1_1 << endl;
+    // cout << "Feature 2: math = " << math1_2
+    //      << ", sko = " << sko1_2 << endl;
 
-    cout << endl;
+    // cout << endl;
 
-    cout << "Class 2:" << endl;
-    cout << "Feature 1: math = " << math2_1
-         << ", sko = " << sko2_1 << endl;
-    cout << "Feature 2: math = " << math2_2
-         << ", sko = " << sko2_2 << endl;
+    // cout << "Class 2:" << endl;
+    // cout << "Feature 1: math = " << math2_1
+    //      << ", sko = " << sko2_1 << endl;
+    // cout << "Feature 2: math = " << math2_2
+    //      << ", sko = " << sko2_2 << endl;
 
 
     // Bayesian classifier
@@ -180,7 +180,9 @@ int main() {
 
 
     cout << endl;
-    cout << "Bayesian classifier:" << endl;
+    // cout << "Bayesian classifier:" << endl;
+
+    int correctTrain = 0;
 
 
     // Classify every object from the training sample
@@ -254,14 +256,26 @@ int main() {
             predictedClass = 2;
         }
 
+        if (predictedClass == a[i][2]) {
+            correctTrain++;
+        }
+
 
         // Output result for current object
-        cout << "Object " << i + 1
-             << ": x = " << x
-             << ", y = " << y
-             << ", predicted class = "
-             << predictedClass << endl;
+        // cout << "Object " << i + 1
+        //      << ": x = " << x
+        //      << ", y = " << y
+        //      << ", predicted class = "
+        //      << predictedClass << endl;
+
     }
+
+    double accuracyTrain = (double)correctTrain / rows;
+
+    //Output accuracy iris34_train.txt
+    cout << endl;
+    cout << "Training accuracy = "
+         << accuracyTrain * 100 << "%" << endl;
 
     // Clear memory
     for (int i = 0; i < rows; i++) {

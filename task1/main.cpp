@@ -6,16 +6,16 @@ using namespace std;
 
 int main() {
     // Open file for reading
-    ifstream fin("iris34_train.txt");
+    ifstream fin("iris34_test.txt");
 
     // Check if the file was opened
     if (!fin.is_open()) {
-        cout << "Error: File iris34_train.txt not found!" << endl;
+        cout << "Error: File iris34_test.txt not found!" << endl;
         return 1;
     }
 
     // Number of rows and columns
-    int rows = 105;
+    int rows = 45;
     int cols = 3; // 2 features and 1 class
 
     // Allocate memory for a two-dimensional array
@@ -25,7 +25,7 @@ int main() {
         a[i] = new double[cols];
     }
 
-    // Read data from the file iris34_train.txt
+    // Read data from the file iris34_test.txt
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             fin >> a[i][j];
@@ -272,9 +272,9 @@ int main() {
 
     double accuracyTrain = (double)correctTrain / rows;
 
-    //Output accuracy iris34_train.txt
+    //Output accuracy iris34_test.txt
     cout << endl;
-    cout << "Training accuracy = "
+    cout << "Testing accuracy = "
          << accuracyTrain * 100 << "%" << endl;
 
     // Clear memory

@@ -5,27 +5,36 @@
 using namespace std;
 
 int main() {
-    // Open file for reading
-    ifstream fin("iris34_test.txt");
+    // Number of rows and columns
+    int rows = 105;
+    int cols = 3; // 2 signs and 1 class
+
+    // Number of classes
+    int c = 3;
+
+    // Number of sign
+    int sign = cols - 1;
+
+
+    // Open train file for reading
+    ifstream fin("iris34_train.txt");
 
     // Check if the file was opened
     if (!fin.is_open()) {
-        cout << "Error: File iris34_test.txt not found!" << endl;
+        cout << "Error: File iris34_train.txt not found!" << endl;
         return 1;
     }
 
-    // Number of rows and columns
-    int rows = 45;
-    int cols = 3; // 2 features and 1 class
 
-    // Allocate memory for a two-dimensional array
+    // Allocate memory for train data
     double** a = new double*[rows];
 
     for (int i = 0; i < rows; i++) {
         a[i] = new double[cols];
     }
 
-    // Read data from the file iris34_test.txt
+
+    // Read train data
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             fin >> a[i][j];
@@ -34,255 +43,300 @@ int main() {
 
     fin.close();
 
+
     // Mathematical expectations
-    double sum1 = 0;
-    double sum2 = 0;
 
-    int count0 = 0;
-    int count1 = 0;
-    int count2 = 0;
+    double** math = new double*[c];
+
+    for (int i = 0; i < c; i++) {
+        math[i] = new double[sign];
+    }
 
 
-    // Class 0
-    for (int i = 0; i < rows; i++) {
-        if (a[i][2] == 0) {
-            sum1 += a[i][0];
-            sum2 += a[i][1];
-            count0++;
+    // Number of objects in each class
+    int* count = new int[c];
+
+    for (int k = 0; k < c; k++) {
+        count[k] = 0;
+    }
+
+
+    // Calculate mathematical expectations
+    for (int k = 0; k < c; k++) {
+
+        for (int i = 0; i < rows; i++) {
+
+            if (a[i][cols - 1] == k) {
+                count[k]++;
+            }
+        }
+
+
+        for (int j = 0; j < sign; j++) {
+
+            double sum = 0;
+
+            for (int i = 0; i < rows; i++) {
+
+                if (a[i][cols - 1] == k) {
+                    sum += a[i][j];
+                }
+            }
+
+            math[k][j] = sum / count[k];
         }
     }
 
-    double math0_1 = sum1 / count0;
-    double math0_2 = sum2 / count0;
-
-
-    // Reset sums
-    sum1 = 0;
-    sum2 = 0;
-
-
-    // Class 1
-    for (int i = 0; i < rows; i++) {
-        if (a[i][2] == 1) {
-            sum1 += a[i][0];
-            sum2 += a[i][1];
-            count1++;
-        }
-    }
-
-    double math1_1 = sum1 / count1;
-    double math1_2 = sum2 / count1;
-
-
-    // Reset sums
-    sum1 = 0;
-    sum2 = 0;
-
-
-    // Class 2
-    for (int i = 0; i < rows; i++) {
-        if (a[i][2] == 2) {
-            sum1 += a[i][0];
-            sum2 += a[i][1];
-            count2++;
-        }
-    }
-
-    double math2_1 = sum1 / count2;
-    double math2_2 = sum2 / count2;
 
     // Standard deviation
-    
-    // Class 0
-    sum1 = 0;
-    sum2 = 0;
 
-    for (int i = 0; i < rows; i++) {
-        if (a[i][2] == 0) {
-            sum1 += pow(a[i][0] - math0_1, 2);
-            sum2 += pow(a[i][1] - math0_2, 2);
+    double** sko = new double*[c];
+
+    for (int i = 0; i < c; i++) {
+        sko[i] = new double[sign];
+    }
+
+
+    // Calculate standard deviation
+    for (int k = 0; k < c; k++) {
+
+        for (int j = 0; j < sign; j++) {
+
+            double sum = 0;
+
+            for (int i = 0; i < rows; i++) {
+
+                if (a[i][cols - 1] == k) {
+
+                    sum += pow(a[i][j] - math[k][j], 2);
+                }
+            }
+
+            double dispersion = sum / count[k];
+
+            sko[k][j] = sqrt(dispersion);
         }
     }
 
-    double dispersion0_1 = sum1 / count0;
-    double dispersion0_2 = sum2 / count0;
-
-    double sko0_1 = sqrt(dispersion0_1);
-    double sko0_2 = sqrt(dispersion0_2);
-
-
-    // Class 1
-    sum1 = 0;
-    sum2 = 0;
-
-    for (int i = 0; i < rows; i++) {
-        if (a[i][2] == 1) {
-            sum1 += pow(a[i][0] - math1_1, 2);
-            sum2 += pow(a[i][1] - math1_2, 2);
-        }
-    }
-
-    double dispersion1_1 = sum1 / count1;
-    double dispersion1_2 = sum2 / count1;
-
-    double sko1_1 = sqrt(dispersion1_1);
-    double sko1_2 = sqrt(dispersion1_2);
-
-
-    // Class 2
-    sum1 = 0;
-    sum2 = 0;
-
-    for (int i = 0; i < rows; i++) {
-        if (a[i][2] == 2) {
-            sum1 += pow(a[i][0] - math2_1, 2);
-            sum2 += pow(a[i][1] - math2_2, 2);
-        }
-    }
-
-    double dispersion2_1 = sum1 / count2;
-    double dispersion2_2 = sum2 / count2;
-
-    double sko2_1 = sqrt(dispersion2_1);
-    double sko2_2 = sqrt(dispersion2_2);
 
     // Output parameters
-    // cout << "Class 0:" << endl;
-    // cout << "Feature 1: math = " << math0_1
-    //      << ", sko = " << sko0_1 << endl;
-    // cout << "Feature 2: math = " << math0_2
-    //      << ", sko = " << sko0_2 << endl;
 
-    // cout << endl;
+    for (int k = 0; k < c; k++) {
 
-    // cout << "Class 1:" << endl;
-    // cout << "Feature 1: math = " << math1_1
-    //      << ", sko = " << sko1_1 << endl;
-    // cout << "Feature 2: math = " << math1_2
-    //      << ", sko = " << sko1_2 << endl;
+        cout << "Class " << k << ":" << endl;
 
-    // cout << endl;
+        for (int j = 0; j < sign; j++) {
 
-    // cout << "Class 2:" << endl;
-    // cout << "Feature 1: math = " << math2_1
-    //      << ", sko = " << sko2_1 << endl;
-    // cout << "Feature 2: math = " << math2_2
-    //      << ", sko = " << sko2_2 << endl;
+            cout << "Priznak " << j + 1
+                 << ": math = " << math[k][j]
+                 << ", sko = " << sko[k][j] << endl;
+        }
+
+        cout << endl;
+    }
 
 
     // Bayesian classifier
+
     double pi = 3.14159265359;
 
-    // Prior probabilities of classes
-    double prior0 = (double)count0 / rows;
-    double prior1 = (double)count1 / rows;
-    double prior2 = (double)count2 / rows;
 
-
-    cout << endl;
-    // cout << "Bayesian classifier:" << endl;
+    // Calculate training accuracy
 
     int correctTrain = 0;
 
 
-    // Classify every object from the training sample
     for (int i = 0; i < rows; i++) {
 
-        // X and Y of the current object
-        double x = a[i][0];
-        double y = a[i][1];
+        // Bayes values for all classes
+        double* bayes = new double[c];
 
-        // Class 0
-        double p0_x =
-            (1 / (sko0_1 * sqrt(2 * pi))) *
-            exp(-pow(x - math0_1, 2) /
-            (2 * pow(sko0_1, 2)));
 
-        double p0_y =
-            (1 / (sko0_2 * sqrt(2 * pi))) *
-            exp(-pow(y - math0_2, 2) /
-            (2 * pow(sko0_2, 2)));
+        for (int k = 0; k < c; k++) {
 
-        // Two-dimensional density
-        double p0 = p0_x * p0_y;
+            double p = 1;
 
-        // Bayes value
-        double bayes0 = p0 * prior0;
 
-        // Class 1
-        double p1_x =
-            (1 / (sko1_1 * sqrt(2 * pi))) *
-            exp(-pow(x - math1_1, 2) /
-            (2 * pow(sko1_1, 2)));
+            for (int j = 0; j < sign; j++) {
 
-        double p1_y =
-            (1 / (sko1_2 * sqrt(2 * pi))) *
-            exp(-pow(y - math1_2, 2) /
-            (2 * pow(sko1_2, 2)));
+                double x = a[i][j];
 
-        // Two-dimensional density
-        double p1 = p1_x * p1_y;
+                double p_x =
+                    (1 / (sko[k][j] * sqrt(2 * pi))) *
+                    exp(-pow(x - math[k][j], 2) /
+                    (2 * pow(sko[k][j], 2)));
 
-        // Bayes value
-        double bayes1 = p1 * prior1;
 
-        // Class 2
-        double p2_x =
-            (1 / (sko2_1 * sqrt(2 * pi))) *
-            exp(-pow(x - math2_1, 2) /
-            (2 * pow(sko2_1, 2)));
+                p = p * p_x;
+            }
 
-        double p2_y =
-            (1 / (sko2_2 * sqrt(2 * pi))) *
-            exp(-pow(y - math2_2, 2) /
-            (2 * pow(sko2_2, 2)));
 
-        // Two-dimensional density
-        double p2 = p2_x * p2_y;
-
-        // Bayes value
-        double bayes2 = p2 * prior2;
-
-        // Find the class
-        int predictedClass;
-
-        if (bayes0 > bayes1 && bayes0 > bayes2) {
-            predictedClass = 0;
-        }
-        else if (bayes1 > bayes0 && bayes1 > bayes2) {
-            predictedClass = 1;
-        }
-        else {
-            predictedClass = 2;
+            // Bayes value
+            bayes[k] = p;
         }
 
-        if (predictedClass == a[i][2]) {
+
+        // Find the class with the largest Bayes value
+        int predictedClass = 0;
+
+        for (int k = 1; k < c; k++) {
+
+            if (bayes[k] > bayes[predictedClass]) {
+                predictedClass = k;
+            }
+        }
+
+
+        // Check the result
+        if (predictedClass == a[i][cols - 1]) {
             correctTrain++;
         }
 
 
-        // Output result for current object
-        // cout << "Object " << i + 1
-        //      << ": x = " << x
-        //      << ", y = " << y
-        //      << ", predicted class = "
-        //      << predictedClass << endl;
-
+        delete[] bayes;
     }
+
 
     double accuracyTrain = (double)correctTrain / rows;
 
-    //Output accuracy iris34_test.txt
-    cout << endl;
-    cout << "Testing accuracy = "
+
+    cout << "Training accuracy = "
          << accuracyTrain * 100 << "%" << endl;
 
-    // Clear memory
+
+    // Clear train data
+
     for (int i = 0; i < rows; i++) {
         delete[] a[i];
     }
 
     delete[] a;
+
+
+    // Open test file for reading
+
+    ifstream finTest("iris34_test.txt");
+
+    // Check if the file was opened
+    if (!finTest.is_open()) {
+        cout << "Error: File iris34_test.txt not found!" << endl;
+        return 1;
+    }
+
+
+    // Number of test rows
+    int testRows = 45;
+
+
+    // Allocate memory for test data
+
+    double** test = new double*[testRows];
+
+    for (int i = 0; i < testRows; i++) {
+        test[i] = new double[cols];
+    }
+
+
+    // Read test data
+
+    for (int i = 0; i < testRows; i++) {
+        for (int j = 0; j < cols; j++) {
+            finTest >> test[i][j];
+        }
+    }
+
+    finTest.close();
+
+
+    // Calculate test accuracy
+
+    int correctTest = 0;
+
+
+    for (int i = 0; i < testRows; i++) {
+
+        // Bayes values for all classes
+        double* bayes = new double[c];
+
+
+        for (int k = 0; k < c; k++) {
+
+            double p = 1;
+
+
+            // using math and sko from train
+
+            for (int j = 0; j < sign; j++) {
+
+                double x = test[i][j];
+
+                double p_x =
+                    (1.0 / (sko[k][j] * sqrt(2 * pi))) *
+                    exp(-pow(x - math[k][j], 2) /
+                    (2 * pow(sko[k][j], 2)));
+
+
+                p = p * p_x;
+            }
+
+
+            // Bayes value
+            bayes[k] = p;
+        }
+
+
+        // Find the class with the largest Bayes value
+
+        int predictedClass = 0;
+
+        for (int k = 1; k < c; k++) {
+
+            if (bayes[k] > bayes[predictedClass]) {
+                predictedClass = k;
+            }
+        }
+
+
+        // Check the result
+
+        if (predictedClass == test[i][cols - 1]) {
+            correctTest++;
+        }
+
+
+        delete[] bayes;
+    }
+
+
+    double accuracyTest = (double)correctTest / testRows;
+
+
+    // Output only test accuracy
+
+    cout << "Test accuracy = "
+         << accuracyTest * 100 << "%" << endl;
+
+
+    // Clear test data
+
+    for (int i = 0; i < testRows; i++) {
+        delete[] test[i];
+    }
+
+    delete[] test;
+
+
+    // Clear parameters
+
+    for (int i = 0; i < c; i++) {
+        delete[] math[i];
+        delete[] sko[i];
+    }
+
+    delete[] math;
+    delete[] sko;
+    delete[] count;
+
 
     return 0;
 }

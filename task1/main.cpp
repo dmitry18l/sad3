@@ -43,7 +43,6 @@ int main() {
 
     fin.close();
 
-
     // Mathematical expectations
 
     double** math = new double*[c];
@@ -52,7 +51,6 @@ int main() {
         math[i] = new double[sign];
     }
 
-
     // Number of objects in each class
     int* count = new int[c];
 
@@ -60,42 +58,41 @@ int main() {
         count[k] = 0;
     }
 
-
     // Calculate mathematical expectations
     for (int k = 0; k < c; k++) {
 
         for (int i = 0; i < rows; i++) {
-
+            
             if (a[i][cols - 1] == k) {
                 count[k]++;
             }
         }
-
+        //cout << k << ' ' << count[k] << endl;
 
         for (int j = 0; j < sign; j++) {
 
             double sum = 0;
 
             for (int i = 0; i < rows; i++) {
-
+                
                 if (a[i][cols - 1] == k) {
                     sum += a[i][j];
                 }
             }
+            //cout << sum << endl;
 
-            math[k][j] = sum / count[k];
+            math[k][j] = sum/count[k];
+            //cout << math[k][j] << endl;
         }
+
     }
 
-
     // Standard deviation
-
     double** sko = new double*[c];
 
     for (int i = 0; i < c; i++) {
         sko[i] = new double[sign];
     }
-
 
     // Calculate standard deviation
     for (int k = 0; k < c; k++) {
@@ -112,12 +109,13 @@ int main() {
                 }
             }
 
-            double dispersion = sum / count[k];
+            double dispersion = sum/count[k];
 
             sko[k][j] = sqrt(dispersion);
+            //cout << sko[k][j] << endl;
         }
-    }
 
+    }
 
     // Output parameters
 
@@ -129,12 +127,11 @@ int main() {
 
             cout << "Priznak " << j + 1
                  << ": math = " << math[k][j]
-                 << ", sko = " << sko[k][j] << endl;
+                 << ": sko = " << sko[k][j] << endl;
         }
 
         cout << endl;
     }
-
 
     // Bayesian classifier
 
@@ -145,64 +142,52 @@ int main() {
 
     int correctTrain = 0;
 
-
     for (int i = 0; i < rows; i++) {
 
         // Bayes values for all classes
         double* bayes = new double[c];
 
-
         for (int k = 0; k < c; k++) {
 
             double p = 1;
-
 
             for (int j = 0; j < sign; j++) {
 
                 double x = a[i][j];
 
-                double p_x =
-                    (1 / (sko[k][j] * sqrt(2 * pi))) *
-                    exp(-pow(x - math[k][j], 2) /
-                    (2 * pow(sko[k][j], 2)));
-
-
+                double p_x = 
+                (1 / (sko[k][j] * sqrt(2 * pi))) * exp(-pow(x - math[k][j], 2) / (2 * pow(sko[k][j], 2)));
+            
                 p = p * p_x;
-            }
 
+            }
 
             // Bayes value
             bayes[k] = p;
         }
 
-
         // Find the class with the largest Bayes value
         int predictedClass = 0;
 
-        for (int k = 1; k < c; k++) {
+        for (int k = 1; k < c; k ++) {
 
             if (bayes[k] > bayes[predictedClass]) {
                 predictedClass = k;
             }
         }
 
-
         // Check the result
         if (predictedClass == a[i][cols - 1]) {
             correctTrain++;
         }
 
-
         delete[] bayes;
     }
 
-
     double accuracyTrain = (double)correctTrain / rows;
-
 
     cout << "Training accuracy = "
          << accuracyTrain * 100 << "%" << endl;
-
 
     // Clear train data
 
@@ -211,7 +196,6 @@ int main() {
     }
 
     delete[] a;
-
 
     // Open test file for reading
 
@@ -339,4 +323,5 @@ int main() {
 
 
     return 0;
+    
 }

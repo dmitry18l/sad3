@@ -10,7 +10,7 @@ int main() {
 
     // Number of rows and columns
     int rows = 1600;
-    int cols = 1000; // 3 signs and 1 class
+    int cols = 1000; // 999 signs and 1 class
 
     // Number of classes
     int c = 2;

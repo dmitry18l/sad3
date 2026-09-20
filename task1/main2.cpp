@@ -9,8 +9,8 @@ using namespace std;
 int main() {
 
     // Number of rows and columns
-    int rows = 88;
-    int cols = 9; // 3 signs and 1 class
+    int rows = 1600;
+    int cols = 1000; // 3 signs and 1 class
 
     // Number of classes
     int c = 2;
@@ -19,14 +19,14 @@ int main() {
     int sign = cols - 1;
 
     // Class labels
-    int classLabel[2] = {0, 2};
+    int classLabel[2] = {0, 1};
 
     // Open file for reading
-    ifstream fin("postoperative_patient_data.txt");
+    ifstream fin("GAMETES_Epistasis_2_Way_1000atts_0.4H_EDM_1_EDM_1_1.txt");
 
     // Check if the file was opened
     if (!fin.is_open()) {
-        cout << "Error: File postoperative_patient_data.txt not found!" << endl;
+        cout << "Error: File GAMETES_Epistasis_2_Way_1000atts_0.4H_EDM_1_EDM_1_1.txt not found!" << endl;
         return 1;
     }
 

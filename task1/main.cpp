@@ -1,40 +1,43 @@
 #include "iostream"
 #include "fstream"
 #include "cmath"
+#include "cstdlib"
+#include "ctime"
 
 using namespace std;
 
 int main() {
+
     // Number of rows and columns
-    int rows = 105;
-    int cols = 3; // 2 signs and 1 class
+    int rows = 83;
+    int cols = 4; // 3 signs and 1 class
 
     // Number of classes
-    int c = 3;
+    int c = 2;
 
-    // Number of sign
+    // Number of signs
     int sign = cols - 1;
 
+    // Class labels
+    int classLabel[2] = {0, 1};
 
-    // Open train file for reading
-    ifstream fin("iris34_train.txt");
+    // Open file for reading
+    ifstream fin("analcatdata_asbestos.txt");
 
     // Check if the file was opened
     if (!fin.is_open()) {
-        cout << "Error: File iris34_train.txt not found!" << endl;
+        cout << "Error: File analcatdata_asbestos.txt not found!" << endl;
         return 1;
     }
 
-
-    // Allocate memory for train data
+    // Allocate memory for all data
     double** a = new double*[rows];
 
     for (int i = 0; i < rows; i++) {
         a[i] = new double[cols];
     }
 
-
-    // Read train data
+    // Read data
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             fin >> a[i][j];
@@ -43,8 +46,54 @@ int main() {
 
     fin.close();
 
-    // Mathematical expectations
+    // Randomly mix the data
+    srand(time(0));
 
+    for (int i = 0; i < rows * 10; i++) {
+
+        int r1 = rand() % rows;
+        int r2 = rand() % rows;
+
+        double* temp = a[r1];
+        a[r1] = a[r2];
+        a[r2] = temp;
+    }
+
+    // Split data into train and test
+    int rows_train = rows * 0.8;
+    int rows_test = rows - rows_train;
+
+    // Allocate memory for train data
+    double** train = new double*[rows_train];
+
+    for (int i = 0; i < rows_train; i++) {
+        train[i] = new double[cols];
+    }
+
+    // Allocate memory for test data
+    double** test = new double*[rows_test];
+
+    for (int i = 0; i < rows_test; i++) {
+        test[i] = new double[cols];
+    }
+
+    // Copy data into train
+    for (int i = 0; i < rows_train; i++) {
+
+        for (int j = 0; j < cols; j++) {
+            train[i][j] = a[i][j];
+        }
+    }
+
+    // Copy data into test
+    for (int i = 0; i < rows_test; i++) {
+
+        for (int j = 0; j < cols; j++) {
+            test[i][j] = a[rows_train + i][j];
+        }
+    }
+
+    // Mathematical expectations
     double** math = new double*[c];
 
     for (int i = 0; i < c; i++) {
@@ -61,30 +110,33 @@ int main() {
     // Calculate mathematical expectations
     for (int k = 0; k < c; k++) {
 
-        for (int i = 0; i < rows; i++) {
-            
-            if (a[i][cols - 1] == k) {
+        for (int i = 0; i < rows_train; i++) {
+
+            if (train[i][cols - 1] == classLabel[k]) {
                 count[k]++;
             }
         }
-        //cout << k << ' ' << count[k] << endl;
 
         for (int j = 0; j < sign; j++) {
 
             double sum = 0;
 
-            for (int i = 0; i < rows; i++) {
-                
-                if (a[i][cols - 1] == k) {
-                    sum += a[i][j];
+            for (int i = 0; i < rows_train; i++) {
+
+                if (train[i][cols - 1] == classLabel[k]) {
+                    sum += train[i][j];
                 }
             }
-            //cout << sum << endl;
 
-            math[k][j] = sum/count[k];
-            //cout << math[k][j] << endl;
+            math[k][j] = sum / count[k];
         }
+    }
 
+    // A priori probability
+    double* aprior = new double[c];
+
+    for (int k = 0; k < c; k++) {
+        aprior[k] = (double)count[k] / rows_train;
     }
 
     // Standard deviation
@@ -101,27 +153,26 @@ int main() {
 
             double sum = 0;
 
-            for (int i = 0; i < rows; i++) {
+            for (int i = 0; i < rows_train; i++) {
 
-                if (a[i][cols - 1] == k) {
+                if (train[i][cols - 1] == classLabel[k]) {
 
-                    sum += pow(a[i][j] - math[k][j], 2);
+                    sum += pow(train[i][j] - math[k][j], 2);
                 }
             }
 
-            double dispersion = sum/count[k];
+            double dispersion = sum / count[k];
 
             sko[k][j] = sqrt(dispersion);
-            //cout << sko[k][j] << endl;
         }
-
     }
 
     // Output parameters
-
     for (int k = 0; k < c; k++) {
 
-        cout << "Class " << k << ":" << endl;
+        cout << "Class " << classLabel[k] << ":" << endl;
+
+        cout << "aprior probability = " << aprior[k] << endl;
 
         for (int j = 0; j < sign; j++) {
 
@@ -134,143 +185,42 @@ int main() {
     }
 
     // Bayesian classifier
-
     double pi = 3.14159265359;
 
-
     // Calculate training accuracy
-
     int correctTrain = 0;
 
-    for (int i = 0; i < rows; i++) {
+    for (int i = 0; i < rows_train; i++) {
 
         // Bayes values for all classes
         double* bayes = new double[c];
 
         for (int k = 0; k < c; k++) {
 
+            // Start with 1
             double p = 1;
 
+            // Calculate probability for each sign
             for (int j = 0; j < sign; j++) {
 
-                double x = a[i][j];
-
-                double p_x = 
-                (1 / (sko[k][j] * sqrt(2 * pi))) * exp(-pow(x - math[k][j], 2) / (2 * pow(sko[k][j], 2)));
-            
-                p = p * p_x;
-
-            }
-
-            // Bayes value
-            bayes[k] = p;
-        }
-
-        // Find the class with the largest Bayes value
-        int predictedClass = 0;
-
-        for (int k = 1; k < c; k ++) {
-
-            if (bayes[k] > bayes[predictedClass]) {
-                predictedClass = k;
-            }
-        }
-
-        // Check the result
-        if (predictedClass == a[i][cols - 1]) {
-            correctTrain++;
-        }
-
-        delete[] bayes;
-    }
-
-    double accuracyTrain = (double)correctTrain / rows;
-
-    cout << "Training accuracy = "
-         << accuracyTrain * 100 << "%" << endl;
-
-    // Clear train data
-
-    for (int i = 0; i < rows; i++) {
-        delete[] a[i];
-    }
-
-    delete[] a;
-
-    // Open test file for reading
-
-    ifstream finTest("iris34_test.txt");
-
-    // Check if the file was opened
-    if (!finTest.is_open()) {
-        cout << "Error: File iris34_test.txt not found!" << endl;
-        return 1;
-    }
-
-
-    // Number of test rows
-    int testRows = 45;
-
-
-    // Allocate memory for test data
-
-    double** test = new double*[testRows];
-
-    for (int i = 0; i < testRows; i++) {
-        test[i] = new double[cols];
-    }
-
-
-    // Read test data
-
-    for (int i = 0; i < testRows; i++) {
-        for (int j = 0; j < cols; j++) {
-            finTest >> test[i][j];
-        }
-    }
-
-    finTest.close();
-
-
-    // Calculate test accuracy
-
-    int correctTest = 0;
-
-
-    for (int i = 0; i < testRows; i++) {
-
-        // Bayes values for all classes
-        double* bayes = new double[c];
-
-
-        for (int k = 0; k < c; k++) {
-
-            double p = 1;
-
-
-            // using math and sko from train
-
-            for (int j = 0; j < sign; j++) {
-
-                double x = test[i][j];
+                double x = train[i][j];
 
                 double p_x =
                     (1.0 / (sko[k][j] * sqrt(2 * pi))) *
                     exp(-pow(x - math[k][j], 2) /
                     (2 * pow(sko[k][j], 2)));
 
-
                 p = p * p_x;
             }
 
+            // Multiply by a priori probability
+            p = p * aprior[k];
 
             // Bayes value
             bayes[k] = p;
         }
 
-
         // Find the class with the largest Bayes value
-
         int predictedClass = 0;
 
         for (int k = 1; k < c; k++) {
@@ -280,38 +230,97 @@ int main() {
             }
         }
 
-
         // Check the result
-
-        if (predictedClass == test[i][cols - 1]) {
-            correctTest++;
+        if (classLabel[predictedClass] == train[i][cols - 1]) {
+            correctTrain++;
         }
-
 
         delete[] bayes;
     }
 
+    double accuracyTrain = (double)correctTrain / rows_train;
 
-    double accuracyTest = (double)correctTest / testRows;
+    cout << "Training accuracy = "
+         << accuracyTrain * 100 << "%" << endl;
 
 
-    // Output only test accuracy
+    // Calculate test accuracy
+    int correctTest = 0;
+
+    for (int i = 0; i < rows_test; i++) {
+
+        // Bayes values for all classes
+        double* bayes = new double[c];
+
+        for (int k = 0; k < c; k++) {
+
+            // Start with 1
+            double p = 1;
+
+            // Use math and sko from train
+            for (int j = 0; j < sign; j++) {
+
+                double x = test[i][j];
+
+                double p_x =
+                    (1.0 / (sko[k][j] * sqrt(2 * pi))) *
+                    exp(-pow(x - math[k][j], 2) /
+                    (2 * pow(sko[k][j], 2)));
+
+                p = p * p_x;
+            }
+
+            // Multiply by a priori probability
+            p = p * aprior[k];
+
+            // Bayes value
+            bayes[k] = p;
+        }
+
+        // Find the class with the largest Bayes value
+        int predictedClass = 0;
+
+        for (int k = 1; k < c; k++) {
+
+            if (bayes[k] > bayes[predictedClass]) {
+                predictedClass = k;
+            }
+        }
+
+        // Check the result
+        if (classLabel[predictedClass] == test[i][cols - 1]) {
+            correctTest++;
+        }
+
+        delete[] bayes;
+    }
+
+    double accuracyTest = (double)correctTest / rows_test;
 
     cout << "Test accuracy = "
          << accuracyTest * 100 << "%" << endl;
 
 
-    // Clear test data
+    // Clear all data
+    for (int i = 0; i < rows; i++) {
+        delete[] a[i];
+    }
 
-    for (int i = 0; i < testRows; i++) {
+    delete[] a;
+
+    for (int i = 0; i < rows_train; i++) {
+        delete[] train[i];
+    }
+
+    delete[] train;
+
+    for (int i = 0; i < rows_test; i++) {
         delete[] test[i];
     }
 
     delete[] test;
 
-
     // Clear parameters
-
     for (int i = 0; i < c; i++) {
         delete[] math[i];
         delete[] sko[i];
@@ -320,8 +329,7 @@ int main() {
     delete[] math;
     delete[] sko;
     delete[] count;
-
+    delete[] aprior;
 
     return 0;
-    
 }

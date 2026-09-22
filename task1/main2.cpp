@@ -54,9 +54,7 @@ int main() {
         int r1 = rand() % rows;
         int r2 = rand() % rows;
 
-        double* temp = a[r1];
-        a[r1] = a[r2];
-        a[r2] = temp;
+        swap(a[r1], a[r2]);
     }
 
     // Split data into train and test
@@ -168,21 +166,21 @@ int main() {
     }
 
     // Output parameters
-    for (int k = 0; k < c; k++) {
+    // for (int k = 0; k < c; k++) {
 
-        cout << "Class " << classLabel[k] << ":" << endl;
+    //     cout << "Class " << classLabel[k] << ":" << endl;
 
-        cout << "aprior probability = " << aprior[k] << endl;
+    //     cout << "aprior probability = " << aprior[k] << endl;
 
-        for (int j = 0; j < sign; j++) {
+    //     for (int j = 0; j < sign; j++) {
 
-            cout << "Priznak " << j + 1
-                 << ": math = " << math[k][j]
-                 << ": sko = " << sko[k][j] << endl;
-        }
+    //         cout << "Priznak " << j + 1
+    //              << ": math = " << math[k][j]
+    //              << ": sko = " << sko[k][j] << endl;
+    //     }
 
-        cout << endl;
-    }
+    //     cout << endl;
+    // }
 
     // Bayesian classifier
     double pi = 3.14159265359;

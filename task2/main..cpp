@@ -32,8 +32,8 @@ double object(vector<double>& u, double sigma)
 }
 
 int main() 
-{
-    int n = 2;
+{   
+    int n = 4;
     int N = 1;
     for (int i = 0; i < n; i++)
         N = N * 2;
